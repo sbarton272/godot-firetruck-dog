@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3 uid="uid://bmb1x2y3z4a5b"]
+
+[ext_resource type="Script" path="res://scripts/obstacles/obstacle_base.gd" id="1_base"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_col"]
+size = Vector3(0.3, 1.1, 0.3)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_post"]
+top_radius = 0.05
+bottom_radius = 0.05
+height = 0.9
+
+[sub_resource type="BoxMesh" id="BoxMesh_head"]
+size = Vector3(0.35, 0.25, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="Material_mailbox"]
+albedo_color = Color(0.35, 0.45, 0.55, 1)
+roughness = 0.85
+
+[node name="Mailbox" type="RigidBody3D"]
+mass = 15.0
+script = ExtResource("1_base")
+damage_cost = 50
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+shape = SubResource("BoxShape3D_col")
+
+[node name="Post" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+mesh = SubResource("CylinderMesh_post")
+surface_material_override/0 = SubResource("Material_mailbox")
+
+[node name="Head" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+mesh = SubResource("BoxMesh_head")
+surface_material_override/0 = SubResource("Material_mailbox")
