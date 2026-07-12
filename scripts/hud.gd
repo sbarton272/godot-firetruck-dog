@@ -1,5 +1,16 @@
 extends CanvasLayer
 
+@export var help_display_seconds: float = 2.5
+@export var help_fade_seconds: float = 0.6
+
+func _ready() -> void:
+	$HelpOverlay.modulate.a = 1.0
+	await get_tree().create_timer(help_display_seconds).timeout
+	var tween := create_tween()
+	tween.tween_property($HelpOverlay, "modulate:a", 0.0, help_fade_seconds)
+	await tween.finished
+	$HelpOverlay.visible = false
+
 func update_damage(total: int) -> void:
 	$DamageLabel.text = "$%d" % total
 

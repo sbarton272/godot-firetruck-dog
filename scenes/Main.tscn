@@ -1,6 +1,7 @@
-[gd_scene load_steps=23 format=3 uid="uid://ce7f2a3b4c5d6"]
+[gd_scene load_steps=24 format=3 uid="uid://ce7f2a3b4c5d6"]
 
 [ext_resource type="PackedScene" uid="uid://d0e1s2f3g4h5i" path="res://scenes/env/GameEnvironment.tscn" id="1_env"]
+[ext_resource type="PackedScene" uid="uid://c1f2i3r4e5s6m" path="res://scenes/effects/FireSmoke.tscn" id="11_firesmoke"]
 [ext_resource type="PackedScene" uid="uid://brg6c7d8e9f0g" path="res://scenes/obstacles/Building.tscn" id="2_building"]
 [ext_resource type="PackedScene" uid="uid://bmb1x2y3z4a5b" path="res://scenes/obstacles/Mailbox.tscn" id="3_mailbox"]
 [ext_resource type="PackedScene" uid="uid://bnc2y3z4a5b6c" path="res://scenes/obstacles/TrashCan.tscn" id="4_trashcan"]
@@ -184,6 +185,9 @@ surface_material_override/0 = SubResource("Material_goal")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="GoalBuilding/GoalBuildingCollision"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
 shape = SubResource("BoxShape3D_goalbuilding")
+
+[node name="FireSmoke" parent="GoalBuilding" instance=ExtResource("11_firesmoke")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
 
 [node name="Obstacles" type="Node3D" parent="."]
 
