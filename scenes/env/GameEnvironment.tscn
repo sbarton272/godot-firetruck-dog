@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3 uid="uid://d0e1s2f3g4h5i"]
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_top_color = Color(0.55, 0.68, 0.78, 1)
+sky_horizon_color = Color(0.78, 0.82, 0.82, 1)
+ground_bottom_color = Color(0.42, 0.4, 0.38, 1)
+ground_horizon_color = Color(0.78, 0.82, 0.82, 1)
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+ambient_light_source = 3
+ambient_light_color = Color(0.85, 0.82, 0.78, 1)
+ambient_light_energy = 0.6
+tonemap_mode = 2
+
+[node name="GameEnvironment" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.7071068, -0.5, 0.5, 0, 0.7071068, 0.7071068, -0.7071068, -0.5, 0.5, 0, 4, 0)
+light_color = Color(1, 0.96, 0.88, 1)
+light_energy = 1.1
+shadow_enabled = true

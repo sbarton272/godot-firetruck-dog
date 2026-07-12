@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://brg6c7d8e9f0g"]
+
+[ext_resource type="Script" path="res://scripts/obstacles/obstacle_base.gd" id="1_base"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_col"]
+size = Vector3(4, 3, 4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_building"]
+size = Vector3(4, 3, 4)
+
+[sub_resource type="StandardMaterial3D" id="Material_building"]
+albedo_color = Color(0.82, 0.76, 0.62, 1)
+roughness = 0.95
+
+[node name="Building" type="RigidBody3D"]
+freeze = true
+freeze_mode = 0
+script = ExtResource("1_base")
+damage_cost = 300
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("BoxShape3D_col")
+
+[node name="BuildingMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+mesh = SubResource("BoxMesh_building")
+surface_material_override/0 = SubResource("Material_building")

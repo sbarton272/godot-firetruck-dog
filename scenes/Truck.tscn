@@ -1,0 +1,104 @@
+[gd_scene load_steps=16 format=3 uid="uid://c8k3n5p2q1r0s"]
+
+[ext_resource type="PackedScene" uid="uid://d0e1s2f3g4h5i" path="res://scenes/env/GameEnvironment.tscn" id="1_env"]
+[ext_resource type="Script" path="res://scripts/truck_controller.gd" id="2_truck"]
+[ext_resource type="Script" path="res://scripts/camera_rig.gd" id="3_camera"]
+[ext_resource type="Script" path="res://scripts/dog_bust.gd" id="4_dog"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(60, 1, 60)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+size = Vector3(60, 1, 60)
+
+[sub_resource type="StandardMaterial3D" id="Material_ground"]
+albedo_color = Color(0.62, 0.66, 0.58, 1)
+roughness = 1.0
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_truck"]
+friction = 0.05
+bounce = 0.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_body"]
+size = Vector3(2, 1.2, 4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_chassis"]
+size = Vector3(2, 1.2, 4)
+
+[sub_resource type="StandardMaterial3D" id="Material_chassis"]
+albedo_color = Color(0.72, 0.32, 0.27, 1)
+roughness = 0.8
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_head"]
+radius = 0.32
+height = 0.7
+
+[sub_resource type="StandardMaterial3D" id="Material_dog"]
+albedo_color = Color(0.93, 0.89, 0.8, 1)
+roughness = 0.9
+
+[sub_resource type="SphereMesh" id="SphereMesh_ear"]
+radius = 0.12
+height = 0.24
+
+[sub_resource type="StandardMaterial3D" id="Material_spot"]
+albedo_color = Color(0.15, 0.13, 0.12, 1)
+roughness = 0.9
+
+[node name="Truck" type="Node3D"]
+
+[node name="GameEnvironment" parent="." instance=ExtResource("1_env")]
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="GroundCollision" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_ground")
+
+[node name="GroundMesh" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("BoxMesh_ground")
+surface_material_override/0 = SubResource("Material_ground")
+
+[node name="TruckBody" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+mass = 800.0
+physics_material_override = SubResource("PhysicsMaterial_truck")
+linear_damp = 0.3
+angular_damp = 0.4
+script = ExtResource("2_truck")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TruckBody"]
+shape = SubResource("BoxShape3D_body")
+
+[node name="ChassisMesh" type="MeshInstance3D" parent="TruckBody"]
+mesh = SubResource("BoxMesh_chassis")
+surface_material_override/0 = SubResource("Material_chassis")
+
+[node name="DogBust" type="Node3D" parent="TruckBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0.6)
+script = ExtResource("4_dog")
+
+[node name="DogHead" type="MeshInstance3D" parent="TruckBody/DogBust"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
+mesh = SubResource("CapsuleMesh_head")
+surface_material_override/0 = SubResource("Material_dog")
+
+[node name="LeftEar" type="MeshInstance3D" parent="TruckBody/DogBust"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, 0.32, 0)
+mesh = SubResource("SphereMesh_ear")
+surface_material_override/0 = SubResource("Material_spot")
+
+[node name="RightEar" type="MeshInstance3D" parent="TruckBody/DogBust"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, 0.32, 0)
+mesh = SubResource("SphereMesh_ear")
+surface_material_override/0 = SubResource("Material_spot")
+
+[node name="CameraRig" type="Node3D" parent="TruckBody"]
+top_level = true
+script = ExtResource("3_camera")
+target_path = NodePath("..")
+offset = Vector3(9, 9, 9)
+
+[node name="Camera3D" type="Camera3D" parent="TruckBody/CameraRig"]
+rotation_degrees = Vector3(-30, 45, 0)
+current = true
