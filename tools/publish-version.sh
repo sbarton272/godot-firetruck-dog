@@ -16,6 +16,16 @@ if ! command -v godot >/dev/null 2>&1; then
   exit 1
 fi
 
+if ! command -v jq >/dev/null 2>&1; then
+  echo "ERROR: 'jq' not found on PATH. Install jq (e.g. 'brew install jq') to publish a version." >&2
+  exit 1
+fi
+
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "ERROR: 'python3' not found on PATH. Install Python 3 to publish a version." >&2
+  exit 1
+fi
+
 if [[ ! -f "$REPO_ROOT/export_presets.cfg" ]] || ! grep -q 'name="Web"' "$REPO_ROOT/export_presets.cfg"; then
   echo "ERROR: No 'Web' export preset found in export_presets.cfg." >&2
   echo "Open the project in the Godot editor: Project > Export > Add > Web, then retry." >&2
