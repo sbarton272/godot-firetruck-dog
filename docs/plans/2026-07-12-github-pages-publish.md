@@ -4,9 +4,9 @@
 
 **Goal:** Let the developer publish deliberately-curated, versioned web builds of the game to GitHub Pages, each linked from an index page with a short human-written summary.
 
-**Architecture:** A `github-pages/` folder on `main` (served directly by GitHub Pages, no `gh-pages` branch, no CI) holds `versions.json` (source of truth), a generated `index.html`, and one `vN/` folder per published Godot Web export. Publishing is two steps: `tools/new-version.sh "<summary>"` stages a metadata bump (fast, no Godot), then `git commit` triggers a `pre-commit` hook that — only when `versions.json` is staged and the new version's build is missing — runs the actual `godot --headless --export-release` and folds the build output into the same commit.
+**Architecture:** A `github-pages/` folder on `main` (served directly by GitHub Pages, no `gh-pages` branch, no CI, no git hooks) holds `versions.json` (source of truth), a generated `index.html`, and one `vN/` folder per published Godot Web export. Publishing is a single manual script, `tools/publish-version.sh "<summary>"`, run only when the developer deliberately decides a state is share-worthy. It verifies prerequisites, runs `godot --headless --export-release`, bumps `versions.json`, regenerates `index.html`, and stages everything — the developer reviews the diff and commits themselves.
 
-**Tech Stack:** Bash (scripts + git hook), Python 3 (HTML generation, for safe escaping), `jq` (JSON editing), Godot 4.7 CLI (`godot --headless --export-release`).
+**Tech Stack:** Bash (the publish script), Python 3 (HTML generation, for safe escaping), `jq` (JSON editing), Godot 4.7 CLI (`godot --headless --export-release`).
 
 ## Global Constraints
 
@@ -14,7 +14,7 @@
 - Automation scripts live under `tools/`, never under `scripts/` (that path is reserved for GDScript source at `res://scripts/`).
 - Web export must keep **Thread Support disabled** (Godot's default) so the build runs on GitHub Pages' plain static hosting, which does not set COOP/COEP headers.
 - `export_presets.cfg` is safe and intended to be committed to version control (per Godot's own docs).
-- `.git/hooks` is not tracked by git — every clone/worktree needs `tools/install-hooks.sh` run once.
+- Publishing is fully manual — no git hooks of any kind. `tools/publish-version.sh` stages files but never commits.
 - No GitHub Action, no `gh-pages` branch. GitHub Pages is configured (one-time, manual) to serve `main` branch, `/github-pages` folder.
 
 ---
@@ -27,7 +27,7 @@ This task cannot be automated: it requires interactive use of the Godot editor G
 - Create (by the Godot editor, not by hand): `export_presets.cfg` at repo root.
 
 **Interfaces:**
-- Produces: `export_presets.cfg` containing a preset section with `name="Web"` — consumed by Task 4 (pre-commit hook) and Task 6 (integration test), both of which run `godot --headless --export-release "Web" ...`.
+- Produces: `export_presets.cfg` containing a preset section with `name="Web"` — consumed by Task 3 (`publish-version.sh`) and Task 4 (integration test), both of which run `godot --headless --export-release "Web" ...`.
 
 - [ ] **Step 1: Ask the user to install Web export templates**
 
@@ -75,7 +75,7 @@ EOF
 
 **Interfaces:**
 - Consumes: a JSON file shaped like `[{"version": "v1", "date": "2026-07-12", "summary": "...", "dir": "v1"}, ...]`.
-- Produces: `python3 tools/generate_index.py [versions_json_path] [output_html_path]` — both args optional, defaulting to `github-pages/versions.json` and `github-pages/index.html` relative to the repo root (found via `git rev-parse --show-toplevel`). Writes a static HTML file listing versions newest-first. Consumed by Task 4 (pre-commit hook calls it with no args).
+- Produces: `python3 tools/generate_index.py [versions_json_path] [output_html_path]` — both args optional, defaulting to `github-pages/versions.json` and `github-pages/index.html` relative to the repo root (found via `git rev-parse --show-toplevel`). Writes a static HTML file listing versions newest-first. Consumed by Task 3 (`publish-version.sh` calls it with no args).
 
 - [ ] **Step 1: Write a fixture versions.json to verify against**
 
@@ -199,40 +199,28 @@ EOF
 
 ---
 
-### Task 3: `tools/new-version.sh` — stage a new version entry
+### Task 3: `tools/publish-version.sh` — manual publish script
 
 **Files:**
-- Create: `tools/new-version.sh`
+- Create: `tools/publish-version.sh`
 
 **Interfaces:**
-- Consumes: nothing from earlier tasks (independent of Task 2's script).
-- Produces: `tools/new-version.sh "<summary text>"` — appends `{version, date, summary, dir}` to `github-pages/versions.json` (creating it if missing) and `git add`s it. Consumed by Task 6 (used to create the real `v1` entry) and referenced by Task 4's hook (which reacts to `versions.json` being staged).
+- Consumes: `tools/generate_index.py` (Task 2, invoked with no args so it uses the real repo paths), `export_presets.cfg` (Task 1).
+- Produces: `tools/publish-version.sh "<summary text>"` — the single entry point for publishing. Builds the Web export, appends to `github-pages/versions.json`, regenerates `github-pages/index.html`, and `git add`s all three. Never commits. Exercised for real in Task 4.
 
-- [ ] **Step 1: Set up an isolated scratch git repo to test against (do not touch the real repo's github-pages/ yet)**
+- [ ] **Step 1: Confirm the script doesn't exist yet**
 
-```bash
-rm -rf /tmp/gh-pages-repo-test
-mkdir -p /tmp/gh-pages-repo-test
-cd /tmp/gh-pages-repo-test
-git init -q
-git config user.email test@example.com
-git config user.name "Test"
-```
-
-- [ ] **Step 2: Run the not-yet-created script to confirm it fails**
-
-Run (from the real repo root): `bash tools/new-version.sh "test" ` won't work yet since the script doesn't exist. Confirm:
-`test -f tools/new-version.sh && echo exists || echo "missing (expected)"`
+Run: `test -f tools/publish-version.sh && echo exists || echo "missing (expected)"`
 Expected: `missing (expected)`
 
-- [ ] **Step 3: Write `tools/new-version.sh`**
+- [ ] **Step 2: Write `tools/publish-version.sh`**
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
 if [[ $# -ne 1 || -z "$1" ]]; then
-  echo "Usage: tools/new-version.sh \"<summary of this version>\"" >&2
+  echo "Usage: tools/publish-version.sh \"<summary of this version>\"" >&2
   exit 1
 fi
 
@@ -240,119 +228,6 @@ SUMMARY="$1"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 GITHUB_PAGES_DIR="$REPO_ROOT/github-pages"
 VERSIONS_JSON="$GITHUB_PAGES_DIR/versions.json"
-
-mkdir -p "$GITHUB_PAGES_DIR"
-if [[ ! -f "$VERSIONS_JSON" ]]; then
-  echo "[]" > "$VERSIONS_JSON"
-fi
-
-COUNT=$(jq 'length' "$VERSIONS_JSON")
-NEXT_VERSION="v$((COUNT + 1))"
-TODAY=$(date +%Y-%m-%d)
-
-jq --arg version "$NEXT_VERSION" \
-   --arg date "$TODAY" \
-   --arg summary "$SUMMARY" \
-   --arg dir "$NEXT_VERSION" \
-   '. + [{version: $version, date: $date, summary: $summary, dir: $dir}]' \
-   "$VERSIONS_JSON" > "$VERSIONS_JSON.tmp"
-mv "$VERSIONS_JSON.tmp" "$VERSIONS_JSON"
-
-git -C "$REPO_ROOT" add "$VERSIONS_JSON"
-
-echo "Staged $NEXT_VERSION: \"$SUMMARY\""
-echo "Run 'git commit' to build and publish this version."
-```
-
-```bash
-chmod +x tools/new-version.sh
-```
-
-- [ ] **Step 4: Copy the script into the scratch repo and run it there**
-
-```bash
-mkdir -p /tmp/gh-pages-repo-test/tools
-cp tools/new-version.sh /tmp/gh-pages-repo-test/tools/new-version.sh
-cd /tmp/gh-pages-repo-test
-git add tools/new-version.sh
-git commit -q -m "add script"
-bash tools/new-version.sh "First drivable prototype"
-```
-
-Expected output: `Staged v1: "First drivable prototype"` followed by the commit reminder line.
-
-- [ ] **Step 5: Verify the staged content**
-
-Run (still in `/tmp/gh-pages-repo-test`):
-```bash
-cat github-pages/versions.json
-git diff --cached --name-only
-```
-Expected: `versions.json` contains one entry with `"version": "v1"`, today's date, the summary text, `"dir": "v1"`; `git diff --cached --name-only` lists `github-pages/versions.json`.
-
-- [ ] **Step 6: Run it a second time and verify version increments**
-
-Run: `bash tools/new-version.sh "Second version"`
-Expected: `Staged v2: "Second version"`. Confirm with `jq length github-pages/versions.json` → `2`.
-
-- [ ] **Step 7: Verify the usage error path**
-
-Run: `bash tools/new-version.sh; echo "exit=$?"`
-Expected: prints `Usage: tools/new-version.sh "<summary of this version>"` to stderr, `exit=1`.
-
-- [ ] **Step 8: Clean up scratch repo and commit the real script**
-
-```bash
-cd -
-rm -rf /tmp/gh-pages-repo-test
-git add tools/new-version.sh
-git commit -m "$(cat <<'EOF'
-Add tools/new-version.sh to stage new published-version metadata
-
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
-EOF
-)"
-```
-
----
-
-### Task 4: `tools/hooks/pre-commit` — build gate
-
-**Files:**
-- Create: `tools/hooks/pre-commit`
-
-**Interfaces:**
-- Consumes: `github-pages/versions.json` (Task 3's output shape), `tools/generate_index.py` (Task 2, invoked with no args so it uses the real repo paths), `export_presets.cfg` (Task 1).
-- Produces: when installed as `.git/hooks/pre-commit` (Task 5), intercepts `git commit` — no-ops unless `github-pages/versions.json` is staged and the newest version's build folder doesn't exist yet, in which case it runs `godot --headless --export-release "Web" ...`, regenerates `index.html`, and stages the new build output. Exercised for real in Task 6.
-
-- [ ] **Step 1: Confirm the hook file doesn't exist yet**
-
-Run: `test -f tools/hooks/pre-commit && echo exists || echo "missing (expected)"`
-Expected: `missing (expected)`
-
-- [ ] **Step 2: Write `tools/hooks/pre-commit`**
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-GITHUB_PAGES_DIR="$REPO_ROOT/github-pages"
-VERSIONS_JSON="$GITHUB_PAGES_DIR/versions.json"
-
-STAGED=$(git diff --cached --name-only)
-if ! grep -qxF "github-pages/versions.json" <<< "$STAGED"; then
-  exit 0
-fi
-
-LATEST_DIR=$(jq -r '.[-1].dir' "$VERSIONS_JSON")
-LATEST_VERSION=$(jq -r '.[-1].version' "$VERSIONS_JSON")
-BUILD_DIR="$GITHUB_PAGES_DIR/$LATEST_DIR"
-BUILD_INDEX="$BUILD_DIR/index.html"
-
-if [[ -f "$BUILD_INDEX" ]]; then
-  exit 0
-fi
 
 if ! command -v godot >/dev/null 2>&1; then
   echo "ERROR: 'godot' not found on PATH. Install Godot 4.7 to publish a version." >&2
@@ -372,163 +247,73 @@ if [[ -z "$(ls -A "$TEMPLATES_DIR" 2>/dev/null)" ]]; then
   exit 1
 fi
 
-echo "Building $LATEST_VERSION ($LATEST_DIR)..."
+mkdir -p "$GITHUB_PAGES_DIR"
+if [[ ! -f "$VERSIONS_JSON" ]]; then
+  echo "[]" > "$VERSIONS_JSON"
+fi
+
+COUNT=$(jq 'length' "$VERSIONS_JSON")
+NEXT_VERSION="v$((COUNT + 1))"
+TODAY=$(date +%Y-%m-%d)
+BUILD_DIR="$GITHUB_PAGES_DIR/$NEXT_VERSION"
+BUILD_INDEX="$BUILD_DIR/index.html"
+
+echo "Building $NEXT_VERSION..."
 mkdir -p "$BUILD_DIR"
 godot --headless --path "$REPO_ROOT" --export-release "Web" "$BUILD_INDEX"
 
+jq --arg version "$NEXT_VERSION" \
+   --arg date "$TODAY" \
+   --arg summary "$SUMMARY" \
+   --arg dir "$NEXT_VERSION" \
+   '. + [{version: $version, date: $date, summary: $summary, dir: $dir}]' \
+   "$VERSIONS_JSON" > "$VERSIONS_JSON.tmp"
+mv "$VERSIONS_JSON.tmp" "$VERSIONS_JSON"
+
 python3 "$REPO_ROOT/tools/generate_index.py"
 
-git -C "$REPO_ROOT" add "$BUILD_DIR" "$GITHUB_PAGES_DIR/index.html"
+git -C "$REPO_ROOT" add "$VERSIONS_JSON" "$BUILD_DIR" "$GITHUB_PAGES_DIR/index.html"
 
-echo "Published $LATEST_VERSION."
+echo "Published $NEXT_VERSION: \"$SUMMARY\""
+echo "Review the diff and run 'git commit' to finish publishing."
 ```
 
 ```bash
-mkdir -p tools/hooks
-chmod +x tools/hooks/pre-commit
+chmod +x tools/publish-version.sh
 ```
 
-- [ ] **Step 3: Test the no-op path (versions.json not staged)**
+- [ ] **Step 3: Test the missing-preset error path in an isolated scratch repo (no Godot invocation yet)**
 
 ```bash
-rm -rf /tmp/gh-pages-hook-test
-mkdir -p /tmp/gh-pages-hook-test/github-pages
-cd /tmp/gh-pages-hook-test
+rm -rf /tmp/gh-pages-publish-test
+mkdir -p /tmp/gh-pages-publish-test/tools
+cp tools/publish-version.sh /tmp/gh-pages-publish-test/tools/publish-version.sh
+cd /tmp/gh-pages-publish-test
 git init -q
 git config user.email test@example.com
 git config user.name Test
-echo "[]" > github-pages/versions.json
-git add github-pages/versions.json
-git commit -q -m init
-echo "hi" > README.md
-git add README.md
-bash "$OLDPWD/tools/hooks/pre-commit"; echo "exit=$?"
+bash tools/publish-version.sh "test"; echo "exit=$?"
 ```
-Expected: `exit=0`, no other output (versions.json isn't in this commit's staged diff, only README.md is).
+Expected: if `godot` is on `PATH`, stderr shows `ERROR: No 'Web' export preset found in export_presets.cfg.` (no `export_presets.cfg` exists in this scratch repo) and `exit=1`. Nothing under `github-pages/` is created.
 
-- [ ] **Step 4: Test the already-built no-op path**
+- [ ] **Step 4: Verify the usage error path**
 
-```bash
-mkdir -p github-pages/v1
-touch github-pages/v1/index.html
-cat > github-pages/versions.json <<'EOF'
-[{"version": "v1", "date": "2026-07-12", "summary": "test", "dir": "v1"}]
-EOF
-git add github-pages/versions.json
-bash "$OLDPWD/tools/hooks/pre-commit"; echo "exit=$?"
-```
-Expected: `exit=0`, no "Building..." output (build already exists at `github-pages/v1/index.html`).
+Run: `bash tools/publish-version.sh; echo "exit=$?"`
+Expected: prints `Usage: tools/publish-version.sh "<summary of this version>"` to stderr, `exit=1`.
 
-- [ ] **Step 5: Test the missing-preset error path**
-
-```bash
-rm github-pages/v1/index.html
-rmdir github-pages/v1
-bash "$OLDPWD/tools/hooks/pre-commit"; echo "exit=$?"
-```
-Expected: stderr contains `ERROR: No 'Web' export preset found in export_presets.cfg.` (no `export_presets.cfg` exists in this scratch repo), `exit=1`.
-
-- [ ] **Step 6: Clean up scratch repo**
+- [ ] **Step 5: Clean up scratch repo**
 
 ```bash
 cd -
-rm -rf /tmp/gh-pages-hook-test
-```
-
-- [ ] **Step 7: Commit**
-
-```bash
-git add tools/hooks/pre-commit
-git commit -m "$(cat <<'EOF'
-Add pre-commit hook to build and publish new versions
-
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
-EOF
-)"
-```
-
----
-
-### Task 5: `tools/install-hooks.sh` — install the hook per clone/worktree
-
-**Files:**
-- Create: `tools/install-hooks.sh`
-
-**Interfaces:**
-- Consumes: `tools/hooks/pre-commit` (Task 4).
-- Produces: `tools/install-hooks.sh` — copies the hook into the correct git hooks directory (resolved via `git rev-parse --git-path hooks`, which correctly targets the shared hooks dir even when run from a worktree, since this repo uses git worktrees per `README.md`). Run manually once per clone/worktree in Task 6 and by future contributors.
-
-- [ ] **Step 1: Confirm the script doesn't exist yet**
-
-Run: `test -f tools/install-hooks.sh && echo exists || echo "missing (expected)"`
-Expected: `missing (expected)`
-
-- [ ] **Step 2: Write `tools/install-hooks.sh`**
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-SRC="$REPO_ROOT/tools/hooks/pre-commit"
-HOOKS_DIR="$(git rev-parse --git-path hooks)"
-
-mkdir -p "$HOOKS_DIR"
-cp "$SRC" "$HOOKS_DIR/pre-commit"
-chmod +x "$HOOKS_DIR/pre-commit"
-
-echo "Installed pre-commit hook to $HOOKS_DIR/pre-commit"
-```
-
-```bash
-chmod +x tools/install-hooks.sh
-```
-
-- [ ] **Step 3: Test in a plain (non-worktree) scratch repo**
-
-```bash
-rm -rf /tmp/gh-pages-install-test
-mkdir -p /tmp/gh-pages-install-test/tools/hooks
-cp tools/hooks/pre-commit /tmp/gh-pages-install-test/tools/hooks/pre-commit
-cp tools/install-hooks.sh /tmp/gh-pages-install-test/tools/install-hooks.sh
-cd /tmp/gh-pages-install-test
-git init -q
-bash tools/install-hooks.sh
-diff tools/hooks/pre-commit .git/hooks/pre-commit && echo "IDENTICAL"
-test -x .git/hooks/pre-commit && echo "EXECUTABLE"
-```
-Expected: `Installed pre-commit hook to .../.git/hooks/pre-commit`, then `IDENTICAL`, then `EXECUTABLE`.
-
-- [ ] **Step 4: Test in a worktree (mirrors this project's actual setup)**
-
-```bash
-cd /tmp/gh-pages-install-test
-git commit -q --allow-empty -m init
-git branch feature
-git worktree add /tmp/gh-pages-install-test-wt feature -q
-cd /tmp/gh-pages-install-test-wt
-mkdir -p tools/hooks
-cp /tmp/gh-pages-install-test/tools/hooks/pre-commit tools/hooks/pre-commit
-cp /tmp/gh-pages-install-test/tools/install-hooks.sh tools/install-hooks.sh
-bash tools/install-hooks.sh
-git rev-parse --git-path hooks
-```
-Expected: the install script succeeds and prints an installed-hook path pointing into the **shared** `.git/hooks` dir under `/tmp/gh-pages-install-test/.git/hooks/pre-commit` (not a worktree-local path), confirming the hook applies repo-wide across worktrees.
-
-- [ ] **Step 5: Clean up scratch repos**
-
-```bash
-cd -
-git -C /tmp/gh-pages-install-test worktree remove /tmp/gh-pages-install-test-wt --force 2>/dev/null || true
-rm -rf /tmp/gh-pages-install-test /tmp/gh-pages-install-test-wt
+rm -rf /tmp/gh-pages-publish-test
 ```
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add tools/install-hooks.sh
+git add tools/publish-version.sh
 git commit -m "$(cat <<'EOF'
-Add tools/install-hooks.sh to install the publish pre-commit hook
+Add tools/publish-version.sh as the manual publish entry point
 
 Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
 EOF
@@ -537,43 +322,26 @@ EOF
 
 ---
 
-### Task 6: Integration — publish real v1 and enable Pages
+### Task 4: Integration — publish real v1 and enable Pages
 
 **Files:**
 - Modify: none new; produces real content under `github-pages/` in this repo (`versions.json`, `index.html`, `v1/*`).
 
 **Interfaces:**
-- Consumes: everything from Tasks 1–5, exercised together for the first time end-to-end.
+- Consumes: everything from Tasks 1–3, exercised together for the first time end-to-end.
 - Produces: the first real published version, live on GitHub Pages once pushed.
 
-- [ ] **Step 1: Install the hook in this working copy**
+- [ ] **Step 1: Publish the first version**
 
-Run: `bash tools/install-hooks.sh`
-Expected: `Installed pre-commit hook to <path>/.git/hooks/pre-commit`.
+Run: `bash tools/publish-version.sh "First drivable prototype: drift physics, damage system, win condition."`
+Expected: `Building v1...`, then the real Godot export runs, then `Published v1: "First drivable prototype: ..."` and the commit reminder. If it fails with a missing-preset or missing-templates error, stop and re-verify Task 1 was completed correctly.
 
-- [ ] **Step 2: Stage the first version**
+- [ ] **Step 2: Verify the build output and staged files**
 
-Run: `bash tools/new-version.sh "First drivable prototype: drift physics, damage system, win condition."`
-Expected: `Staged v1: "First drivable prototype: ..."` and the commit reminder.
+Run: `ls github-pages/v1/ && cat github-pages/index.html && git status --short`
+Expected: `github-pages/v1/` contains at least `index.html`, `index.js`, `index.wasm`, `index.pck`; `github-pages/index.html` shows a `v1` entry with the summary text and a link to `v1/index.html`; `git status --short` shows `github-pages/versions.json`, `github-pages/v1/`, and `github-pages/index.html` staged (`A` or `M`), and nothing else.
 
-- [ ] **Step 3: Commit — this triggers the real Godot export via the hook**
-
-```bash
-git commit -m "$(cat <<'EOF'
-Publish v1: first drivable prototype
-
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
-EOF
-)"
-```
-Expected: hook output shows `Building v1 (v1)...` then `Published v1.`, and the commit succeeds. If it fails with a missing-preset or missing-templates error, stop and re-verify Task 1 was completed correctly.
-
-- [ ] **Step 4: Verify the build output**
-
-Run: `ls github-pages/v1/ && cat github-pages/index.html`
-Expected: `github-pages/v1/` contains at least `index.html`, `index.js`, `index.wasm`, `index.pck`; `github-pages/index.html` shows a `v1` entry with the summary text and a link to `v1/index.html`.
-
-- [ ] **Step 5: Serve locally and verify it plays in a browser**
+- [ ] **Step 3: Serve locally and verify it plays in a browser**
 
 ```bash
 cd github-pages && python3 -m http.server 8765 &
@@ -584,19 +352,18 @@ kill %1
 cd -
 ```
 
-- [ ] **Step 6: Verify the hook no-ops on an unrelated commit**
+- [ ] **Step 4: Commit the published version**
 
 ```bash
-echo "" >> README.md
-git add README.md
-git commit -m "test: confirm hook no-ops on non-publish commits"
-```
-Expected: commit completes instantly with no "Building..." output (README.md doesn't touch `github-pages/versions.json`). Then revert this throwaway change:
-```bash
-git revert --no-edit HEAD
+git commit -m "$(cat <<'EOF'
+Publish v1: first drivable prototype
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+EOF
+)"
 ```
 
-- [ ] **Step 7: Enable GitHub Pages (requires user confirmation before touching repo settings)**
+- [ ] **Step 5: Enable GitHub Pages (requires user confirmation before touching repo settings)**
 
 Ask the user: "Ready to enable GitHub Pages for this repo — Settings → Pages → Source: Deploy from a branch → Branch `main`, folder `/github-pages`. This makes the site publicly accessible at `https://sbarton272.github.io/godot-firetruck-dog/`. Want me to set this via `gh api`, or will you do it yourself in the GitHub UI?"
 
@@ -605,7 +372,7 @@ If the user approves doing it via API:
 gh api repos/sbarton272/godot-firetruck-dog/pages -X POST -f "source[branch]=main" -f "source[path]=/github-pages"
 ```
 
-- [ ] **Step 8: Push and confirm the live site**
+- [ ] **Step 6: Push and confirm the live site**
 
 Ask the user before pushing (pushing to `main` is visible to others). Once approved:
 ```bash
