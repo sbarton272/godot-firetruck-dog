@@ -55,20 +55,40 @@ Fully manual, single script — no git hook. Publishing only ever happens when y
 **`tools/publish-version.sh "<summary text>"`**
 - Verifies prerequisites up front, aborting with a clear message if missing:
   - `godot` is on `PATH`.
+  - `jq` and `uv` are on `PATH` (provided by the mise toolchain — see Dev environment below).
   - `export_presets.cfg` exists at repo root and defines a preset named `Web`.
   - Godot Web export templates for the installed engine version are present (`~/Library/Application Support/Godot/export_templates/`).
 - Reads `github-pages/versions.json` (creates `[]` if missing); computes next version `v<count+1>`.
 - Runs `godot --headless --export-release "Web" github-pages/vN/index.html`.
-- Appends `{ version, date: today (YYYY-MM-DD), summary, dir: version }` to `versions.json`.
-- Regenerates `github-pages/index.html` from `versions.json`.
-- `git add`s `github-pages/versions.json`, `github-pages/vN/`, and `github-pages/index.html`.
+- Appends `{ version, date: today (YYYY-MM-DD), summary, dir: version }` to `versions.json` (via `jq`).
+- Regenerates `github-pages/index.html` from `versions.json` (via `uv run tools/generate_index.py`).
+- `git add`s `github-pages/versions.json`, `github-pages/vN/`, `github-pages/index.html`, `github-pages/.nojekyll`, and `github-pages/.gdignore`.
 - Prints a reminder to review the diff and run `git commit` — the script never commits on its own.
+
+## Dev environment (direnv + mise)
+
+The Python/CLI toolchain is pinned and provisioned reproducibly so the publish
+script has the tools it needs:
+
+- **`mise.toml`** pins `python`, `uv`, and `jq` to exact versions and `mise`
+  installs them on demand.
+- **`.envrc`** (direnv) runs `mise install` + `eval "$(mise env)"` to put the
+  pinned tools on `PATH`, prepends mise's shims so the pinned copies win over any
+  system/brew copies, and asserts a compatible **Godot 4.7.x** is on `PATH`
+  (Godot itself is a GUI app installed separately, e.g. `brew install --cask godot`,
+  not managed by mise).
+- The index generator runs under **`uv`** (`uv run tools/generate_index.py`); the
+  script carries PEP 723 inline metadata (`requires-python`, no third-party deps).
+
+Per-checkout activation: run `direnv allow` once. Without direnv, the publish
+script still works as long as `godot`, `jq`, and `uv` are otherwise on `PATH`.
 
 ## One-time setup (not automatable)
 
-1. In the Godot editor: Editor → Manage Export Templates → download/install templates matching the installed engine version (4.7.stable).
-2. In the Godot editor: Project → Export → Add → Web. Leave **Thread Support disabled** (the default) — required so the build runs on GitHub Pages' plain static hosting without cross-origin-isolation headers (COOP/COEP), which GitHub Pages does not set. Save; this writes `export_presets.cfg` at repo root, which is committed normally (Godot's own docs describe this file as safe/intended to commit).
-3. In the GitHub repo settings: Settings → Pages → Source: Deploy from a branch → Branch `main`, folder `/github-pages`.
+1. Install [direnv](https://direnv.net) and [mise](https://mise.jdx.dev), then run `direnv allow` in the checkout. This installs the pinned `python`/`uv`/`jq` and activates them.
+2. In the Godot editor: Editor → Manage Export Templates → download/install templates matching the installed engine version (4.7.stable).
+3. In the Godot editor: Project → Export → Add → Web (single-threaded). Rename the preset to exactly `Web`. Single-threaded is required so the build runs on GitHub Pages' plain static hosting without cross-origin-isolation headers (COOP/COEP), which GitHub Pages does not set. Save; this writes `export_presets.cfg` at repo root, which is committed normally (Godot's own docs describe this file as safe/intended to commit).
+4. In the GitHub repo settings: Settings → Pages → Source: Deploy from a branch → Branch `main`, folder `/github-pages`.
 
 ## Error handling
 

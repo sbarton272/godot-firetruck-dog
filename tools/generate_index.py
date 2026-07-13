@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
+# /// script
+# requires-python = ">=3.9"
+# dependencies = []
+# ///
 """Regenerate github-pages/index.html from github-pages/versions.json."""
 import html
 import json

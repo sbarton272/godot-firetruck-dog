@@ -6,7 +6,7 @@
 
 **Architecture:** A `github-pages/` folder on `main` (served directly by GitHub Pages, no `gh-pages` branch, no CI, no git hooks) holds `versions.json` (source of truth), a generated `index.html`, and one `vN/` folder per published Godot Web export. Publishing is a single manual script, `tools/publish-version.sh "<summary>"`, run only when the developer deliberately decides a state is share-worthy. It verifies prerequisites, runs `godot --headless --export-release`, bumps `versions.json`, regenerates `index.html`, and stages everything — the developer reviews the diff and commits themselves.
 
-**Tech Stack:** Bash (the publish script), Python 3 (HTML generation, for safe escaping), `jq` (JSON editing), Godot 4.7 CLI (`godot --headless --export-release`).
+**Tech Stack:** Bash (the publish script), Python 3 run via `uv` (HTML generation, for safe escaping), `jq` (JSON editing), Godot 4.7 CLI (`godot --headless --export-release`). Dev toolchain (`python`/`uv`/`jq`) is pinned in `mise.toml` and activated per-checkout via `.envrc` (direnv + mise); Godot is asserted (installed separately).
 
 ## Global Constraints
 
@@ -16,6 +16,7 @@
 - `export_presets.cfg` is safe and intended to be committed to version control (per Godot's own docs).
 - Publishing is fully manual — no git hooks of any kind. `tools/publish-version.sh` stages files but never commits.
 - No GitHub Action, no `gh-pages` branch. GitHub Pages is configured (one-time, manual) to serve `main` branch, `/github-pages` folder.
+- Dev toolchain is pinned in `mise.toml` (`python`, `uv`, `jq`) and provisioned by direnv (`.envrc` → `mise install` + `eval "$(mise env)"`, shims prepended). Godot 4.7 is asserted by `.envrc`, not installed by mise. The Python index generator runs via `uv run` (PEP 723 inline metadata, no third-party deps).
 
 ---
 
@@ -97,7 +98,11 @@ Expected: FAIL — `can't open file '.../tools/generate_index.py': [Errno 2] No 
 - [ ] **Step 3: Write `tools/generate_index.py`**
 
 ```python
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
+# /// script
+# requires-python = ">=3.9"
+# dependencies = []
+# ///
 """Regenerate github-pages/index.html from github-pages/versions.json."""
 import html
 import json
@@ -199,6 +204,126 @@ EOF
 
 ---
 
+### Task 2b: Dev environment — direnv + mise + uv
+
+**Files:**
+- Create: `mise.toml` (pins `python`, `uv`, `jq`)
+- Create: `.envrc` (direnv: activate mise toolchain + assert Godot 4.7)
+- Modify: `tools/generate_index.py` (add PEP 723 header + `uv run` shebang)
+- Modify: `.gitignore` (add `.direnv/`, `__pycache__/`, `*.pyc`)
+
+**Interfaces:**
+- Consumes: `tools/generate_index.py` (Task 2).
+- Produces: a pinned, direnv-activated toolchain so `python`/`uv`/`jq` are on `PATH` at fixed versions; `generate_index.py` becomes a `uv run` script. Consumed by Task 3 (`publish-version.sh` calls `uv run` and checks for `uv`) and Task 4 (publish runs under direnv).
+
+- [ ] **Step 1: Pin the toolchain with mise**
+
+Run (writes `mise.toml` and installs the tools):
+```bash
+mise use python@3.13 uv@latest jq@latest
+```
+Then edit `mise.toml` to pin the exact resolved versions (from `mise ls --current`) instead of `latest`, e.g.:
+```toml
+# Dev toolchain for this project, pinned for reproducibility.
+# Installed/activated automatically via .envrc (direnv -> `eval "$(mise env)"`).
+# Godot is NOT managed here — it's a GUI app installed separately (brew cask);
+# .envrc asserts a compatible Godot 4.7 is on PATH.
+[tools]
+python = "3.13.14"
+uv = "0.11.28"
+jq = "1.8.2"
+```
+
+- [ ] **Step 2: Write `.envrc`**
+
+```bash
+# direnv config: activate the mise-managed toolchain and check for Godot.
+# Run `direnv allow` once per checkout to enable. Requires direnv + mise installed.
+
+# Re-evaluate when the pinned toolchain changes.
+watch_file mise.toml
+
+# Install any missing pinned tools, then load them (python, uv, jq) onto PATH.
+# `mise env` emits plain `export` lines, so this needs no global direnv helper.
+mise install
+eval "$(mise env)"
+# Put mise's shims first so the project-pinned python/uv/jq win over any
+# copies already on PATH (e.g. ~/.local/bin/uv, brew jq).
+PATH_add "${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims"
+
+# Godot is not mise-managed (GUI app / brew cask). Assert a compatible version
+# is available so `tools/publish-version.sh` can run the Web export.
+if command -v godot >/dev/null 2>&1; then
+  godot_version="$(godot --version 2>/dev/null | head -n1)"
+  case "$godot_version" in
+    4.7.*) ;;
+    *) log_error "Expected Godot 4.7.x on PATH, found: ${godot_version:-unknown}. Web export may fail." ;;
+  esac
+else
+  log_error "godot not found on PATH. Install Godot 4.7 (e.g. 'brew install --cask godot') to publish web builds."
+fi
+```
+
+- [ ] **Step 3: Convert `generate_index.py` to a `uv run` script**
+
+Change the first line from `#!/usr/bin/env python3` to a PEP 723 header:
+```python
+#!/usr/bin/env -S uv run
+# /// script
+# requires-python = ">=3.9"
+# dependencies = []
+# ///
+```
+(The rest of the file is unchanged from Task 2.)
+
+- [ ] **Step 4: Update `.gitignore`**
+
+Append:
+```
+# direnv local cache
+.direnv/
+
+# Python
+__pycache__/
+*.pyc
+```
+
+- [ ] **Step 5: Activate and verify tool resolution**
+
+```bash
+direnv allow .
+direnv exec . bash -c 'python --version; uv --version; jq --version; godot --version | head -n1'
+```
+Expected: `python` resolves to the pinned 3.13.x, `uv` to the pinned version, `jq` to the pinned version (all via `~/.local/share/mise/shims/…`), and Godot reports 4.7.x with no `log_error`.
+
+- [ ] **Step 6: Verify the generator runs under uv**
+
+```bash
+mkdir -p /tmp/uv-test
+echo '[{"version":"v1","date":"2026-07-01","summary":"First & <only>","dir":"v1"}]' > /tmp/uv-test/versions.json
+direnv exec . uv run tools/generate_index.py /tmp/uv-test/versions.json /tmp/uv-test/index.html
+grep -E 'First &amp; &lt;only&gt;' /tmp/uv-test/index.html && echo OK
+rm -rf /tmp/uv-test
+```
+Expected: escaped summary present, `OK` printed.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add mise.toml .envrc .gitignore tools/generate_index.py
+git commit -m "$(cat <<'EOF'
+Add direnv + mise dev environment; run index generator via uv
+
+Pin python/uv/jq in mise.toml, activate via .envrc (asserting Godot 4.7),
+and make generate_index.py a PEP 723 uv-run script.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
 ### Task 3: `tools/publish-version.sh` — manual publish script
 
 **Files:**
@@ -231,6 +356,16 @@ VERSIONS_JSON="$GITHUB_PAGES_DIR/versions.json"
 
 if ! command -v godot >/dev/null 2>&1; then
   echo "ERROR: 'godot' not found on PATH. Install Godot 4.7 to publish a version." >&2
+  exit 1
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo "ERROR: 'jq' not found on PATH. Install jq (e.g. 'brew install jq') to publish a version." >&2
+  exit 1
+fi
+
+if ! command -v uv >/dev/null 2>&1; then
+  echo "ERROR: 'uv' not found on PATH. Run 'direnv allow' (installs the pinned toolchain via mise), or install uv." >&2
   exit 1
 fi
 
@@ -278,7 +413,7 @@ jq --arg version "$NEXT_VERSION" \
    "$VERSIONS_JSON" > "$VERSIONS_JSON.tmp"
 mv "$VERSIONS_JSON.tmp" "$VERSIONS_JSON"
 
-python3 "$REPO_ROOT/tools/generate_index.py"
+uv run "$REPO_ROOT/tools/generate_index.py"
 
 git -C "$REPO_ROOT" add "$VERSIONS_JSON" "$BUILD_DIR" "$GITHUB_PAGES_DIR/index.html" \
   "$GITHUB_PAGES_DIR/.nojekyll" "$GITHUB_PAGES_DIR/.gdignore"

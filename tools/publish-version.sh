@@ -21,8 +21,8 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 1
 fi
 
-if ! command -v python3 >/dev/null 2>&1; then
-  echo "ERROR: 'python3' not found on PATH. Install Python 3 to publish a version." >&2
+if ! command -v uv >/dev/null 2>&1; then
+  echo "ERROR: 'uv' not found on PATH. Run 'direnv allow' (installs the pinned toolchain via mise), or install uv." >&2
   exit 1
 fi
 
@@ -70,7 +70,7 @@ jq --arg version "$NEXT_VERSION" \
    "$VERSIONS_JSON" > "$VERSIONS_JSON.tmp"
 mv "$VERSIONS_JSON.tmp" "$VERSIONS_JSON"
 
-python3 "$REPO_ROOT/tools/generate_index.py"
+uv run "$REPO_ROOT/tools/generate_index.py"
 
 git -C "$REPO_ROOT" add "$VERSIONS_JSON" "$BUILD_DIR" "$GITHUB_PAGES_DIR/index.html" \
   "$GITHUB_PAGES_DIR/.nojekyll" "$GITHUB_PAGES_DIR/.gdignore"

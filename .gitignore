@@ -3,3 +3,10 @@
 
 # Git worktrees
 worktrees/
+
+# direnv local cache
+.direnv/
+
+# Python
+__pycache__/
+*.pyc
