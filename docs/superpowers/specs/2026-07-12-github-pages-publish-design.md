@@ -41,7 +41,7 @@ github-pages/
 
 Two steps, so the (slow) Godot export only runs when actually publishing, not on every commit:
 
-1. **`scripts/new-version.sh "<summary text>"`**
+1. **`tools/new-version.sh "<summary text>"`**
    - Reads `github-pages/versions.json` (creates `[]` if missing).
    - Next version = `v<count+1>`.
    - Appends `{ version, date: today (YYYY-MM-DD), summary, dir: version }`.
@@ -49,7 +49,7 @@ Two steps, so the (slow) Godot export only runs when actually publishing, not on
    - Prints a reminder to run `git commit` to build and publish.
    - Does **not** invoke Godot. Fast, no build dependency.
 
-2. **`git commit`** → **pre-commit hook** (`scripts/hooks/pre-commit`, installed via `scripts/install-hooks.sh`):
+2. **`git commit`** → **pre-commit hook** (`tools/hooks/pre-commit`, installed via `tools/install-hooks.sh`):
    - `git diff --cached --name-only` — if `github-pages/versions.json` is not staged, exit 0 immediately (no-op for ordinary commits).
    - Otherwise, read the last entry in the staged `versions.json`. If `github-pages/<dir>/index.html` already exists, exit 0 (already built — supports amending without rebuilding).
    - Verify prerequisites, aborting the commit with a clear message if missing:
@@ -64,7 +64,7 @@ Two steps, so the (slow) Godot export only runs when actually publishing, not on
 
 1. In the Godot editor: Editor → Manage Export Templates → download/install templates matching the installed engine version (4.7.stable).
 2. In the Godot editor: Project → Export → Add → Web. Leave **Thread Support disabled** (the default) — required so the build runs on GitHub Pages' plain static hosting without cross-origin-isolation headers (COOP/COEP), which GitHub Pages does not set. Save; this writes `export_presets.cfg` at repo root, which is committed normally (Godot's own docs describe this file as safe/intended to commit).
-3. Run `scripts/install-hooks.sh` once per clone/worktree to install the pre-commit hook (`.git/hooks` is not tracked by git, so every checkout needs this run once).
+3. Run `tools/install-hooks.sh` once per clone/worktree to install the pre-commit hook (`.git/hooks` is not tracked by git, so every checkout needs this run once).
 4. In the GitHub repo settings: Settings → Pages → Source: Deploy from a branch → Branch `main`, folder `/github-pages`.
 
 ## Error handling
@@ -75,7 +75,7 @@ Two steps, so the (slow) Godot export only runs when actually publishing, not on
 
 ## Testing / verification
 
-- Manually run `scripts/new-version.sh "test version"`, then `git commit`, and confirm:
+- Manually run `tools/new-version.sh "test version"`, then `git commit`, and confirm:
   - `github-pages/v1/` contains a working Godot Web export.
   - `github-pages/index.html` lists the new version with correct summary/date and a working play link.
   - Serving `github-pages/` locally (e.g. `python3 -m http.server` from that folder) loads and plays the game in a browser without COOP/COEP-related console errors.
