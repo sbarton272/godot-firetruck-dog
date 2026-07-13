@@ -15,17 +15,28 @@ Let the user share playable web builds of the game as it progresses. Each delibe
 
 ```
 github-pages/
-  index.html         # generated — do not hand-edit
+  .nojekyll           # disables GitHub Pages' Jekyll processing of this folder
+  .gdignore           # keeps the Godot editor from importing the build output
+  index.html          # generated — do not hand-edit
   versions.json       # source of truth for published versions
   v1/                 # self-contained Godot Web export
     index.html
     index.js
     index.wasm
     index.pck
+    index.png         # boot splash
     ...
   v2/
     ...
 ```
+
+- `.nojekyll` is required because GitHub Pages runs Jekyll over branch-served
+  folders by default, which can filter/mangle a static asset dump like a Godot
+  Web export.
+- `.gdignore` is required because the export is written inside the Godot project
+  (`res://github-pages/`); without it the editor would import the build's assets
+  (e.g. the `.png` boot splash), cluttering the project with `.import` files. Both
+  files are created/ensured by the publish script and committed once.
 
 - `github-pages/` lives in `main` and is committed like any other repo content.
 - **GitHub Pages setting** (one-time, in repo Settings → Pages): Deploy from branch `main`, folder `/github-pages`. No Action, no separate branch.

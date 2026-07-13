@@ -206,7 +206,7 @@ EOF
 
 **Interfaces:**
 - Consumes: `tools/generate_index.py` (Task 2, invoked with no args so it uses the real repo paths), `export_presets.cfg` (Task 1).
-- Produces: `tools/publish-version.sh "<summary text>"` — the single entry point for publishing. Builds the Web export, appends to `github-pages/versions.json`, regenerates `github-pages/index.html`, and `git add`s all three. Never commits. Exercised for real in Task 4.
+- Produces: `tools/publish-version.sh "<summary text>"` — the single entry point for publishing. Builds the Web export, appends to `github-pages/versions.json`, regenerates `github-pages/index.html`, ensures `github-pages/.nojekyll` (GitHub Pages) and `github-pages/.gdignore` (Godot editor) exist, and `git add`s all of them. Never commits. Exercised for real in Task 4.
 
 - [ ] **Step 1: Confirm the script doesn't exist yet**
 
@@ -252,6 +252,14 @@ if [[ ! -f "$VERSIONS_JSON" ]]; then
   echo "[]" > "$VERSIONS_JSON"
 fi
 
+# GitHub Pages serves this folder directly; disable Jekyll so it doesn't filter
+# or mangle the exported build's files/folders.
+touch "$GITHUB_PAGES_DIR/.nojekyll"
+# The export is written inside the Godot project (res://github-pages/); a .gdignore
+# stops the editor from importing the build output (e.g. the .png boot splash),
+# which would otherwise clutter the project with .import files on every publish.
+touch "$GITHUB_PAGES_DIR/.gdignore"
+
 COUNT=$(jq 'length' "$VERSIONS_JSON")
 NEXT_VERSION="v$((COUNT + 1))"
 TODAY=$(date +%Y-%m-%d)
@@ -272,7 +280,8 @@ mv "$VERSIONS_JSON.tmp" "$VERSIONS_JSON"
 
 python3 "$REPO_ROOT/tools/generate_index.py"
 
-git -C "$REPO_ROOT" add "$VERSIONS_JSON" "$BUILD_DIR" "$GITHUB_PAGES_DIR/index.html"
+git -C "$REPO_ROOT" add "$VERSIONS_JSON" "$BUILD_DIR" "$GITHUB_PAGES_DIR/index.html" \
+  "$GITHUB_PAGES_DIR/.nojekyll" "$GITHUB_PAGES_DIR/.gdignore"
 
 echo "Published $NEXT_VERSION: \"$SUMMARY\""
 echo "Review the diff and run 'git commit' to finish publishing."
@@ -331,6 +340,8 @@ EOF
 - Consumes: everything from Tasks 1–3, exercised together for the first time end-to-end.
 - Produces: the first real published version, live on GitHub Pages once pushed.
 
+> **Note (import cache):** The headless export relies on Godot's `.godot/` import cache, which is gitignored and per-checkout. Run this publish from a checkout that has been opened at least once in the Godot editor (so resources are imported). If the export produces an empty/broken build on a never-opened worktree, open the project in the editor once (let it finish importing), then re-run. The `export_presets.cfg` from Task 1 is shared via git, but the import cache is not.
+
 - [ ] **Step 1: Publish the first version**
 
 Run: `bash tools/publish-version.sh "First drivable prototype: drift physics, damage system, win condition."`
@@ -339,7 +350,7 @@ Expected: `Building v1...`, then the real Godot export runs, then `Published v1:
 - [ ] **Step 2: Verify the build output and staged files**
 
 Run: `ls github-pages/v1/ && cat github-pages/index.html && git status --short`
-Expected: `github-pages/v1/` contains at least `index.html`, `index.js`, `index.wasm`, `index.pck`; `github-pages/index.html` shows a `v1` entry with the summary text and a link to `v1/index.html`; `git status --short` shows `github-pages/versions.json`, `github-pages/v1/`, and `github-pages/index.html` staged (`A` or `M`), and nothing else.
+Expected: `github-pages/v1/` contains at least `index.html`, `index.js`, `index.wasm`, `index.pck` (and a `.png` boot splash); `github-pages/index.html` shows a `v1` entry with the summary text and a link to `v1/index.html`; `git status --short` shows `github-pages/versions.json`, `github-pages/v1/`, `github-pages/index.html`, `github-pages/.nojekyll`, and `github-pages/.gdignore` staged (`A` or `M`), and nothing else.
 
 - [ ] **Step 3: Serve locally and verify it plays in a browser**
 
