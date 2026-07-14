@@ -3,7 +3,7 @@
 # requires-python = ">=3.9"
 # dependencies = []
 # ///
-"""Regenerate github-pages/index.html from github-pages/versions.json."""
+"""Regenerate site/index.html from site/versions.json."""
 import html
 import json
 import pathlib
@@ -67,8 +67,8 @@ def render(versions: list[dict]) -> str:
 
 def main(argv: list[str]) -> int:
     root = repo_root()
-    versions_path = pathlib.Path(argv[0]) if len(argv) > 0 else root / "github-pages" / "versions.json"
-    output_path = pathlib.Path(argv[1]) if len(argv) > 1 else root / "github-pages" / "index.html"
+    versions_path = pathlib.Path(argv[0]) if len(argv) > 0 else root / "site" / "versions.json"
+    output_path = pathlib.Path(argv[1]) if len(argv) > 1 else root / "site" / "index.html"
 
     versions = json.loads(versions_path.read_text()) if versions_path.exists() else []
     output_path.write_text(render(versions))

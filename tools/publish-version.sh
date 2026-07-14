@@ -8,8 +8,8 @@ fi
 
 SUMMARY="$1"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
-GITHUB_PAGES_DIR="$REPO_ROOT/github-pages"
-VERSIONS_JSON="$GITHUB_PAGES_DIR/versions.json"
+SITE_DIR="$REPO_ROOT/site"
+VERSIONS_JSON="$SITE_DIR/versions.json"
 
 if ! command -v godot >/dev/null 2>&1; then
   echo "ERROR: 'godot' not found on PATH. Install Godot 4.7 to publish a version." >&2
@@ -39,23 +39,23 @@ if [[ -z "$(ls -A "$TEMPLATES_DIR" 2>/dev/null)" ]]; then
   exit 1
 fi
 
-mkdir -p "$GITHUB_PAGES_DIR"
+mkdir -p "$SITE_DIR"
 if [[ ! -f "$VERSIONS_JSON" ]]; then
   echo "[]" > "$VERSIONS_JSON"
 fi
 
 # GitHub Pages serves this folder directly; disable Jekyll so it doesn't filter
 # or mangle the exported build's files/folders.
-touch "$GITHUB_PAGES_DIR/.nojekyll"
-# The export is written inside the Godot project (res://github-pages/); a .gdignore
+touch "$SITE_DIR/.nojekyll"
+# The export is written inside the Godot project (res://site/); a .gdignore
 # stops the editor from importing the build output (e.g. the .png boot splash),
 # which would otherwise clutter the project with .import files on every publish.
-touch "$GITHUB_PAGES_DIR/.gdignore"
+touch "$SITE_DIR/.gdignore"
 
 COUNT=$(jq 'length' "$VERSIONS_JSON")
 NEXT_VERSION="v$((COUNT + 1))"
 TODAY=$(date +%Y-%m-%d)
-BUILD_DIR="$GITHUB_PAGES_DIR/$NEXT_VERSION"
+BUILD_DIR="$SITE_DIR/$NEXT_VERSION"
 BUILD_INDEX="$BUILD_DIR/index.html"
 
 echo "Building $NEXT_VERSION..."
@@ -72,8 +72,8 @@ mv "$VERSIONS_JSON.tmp" "$VERSIONS_JSON"
 
 uv run "$REPO_ROOT/tools/generate_index.py"
 
-git -C "$REPO_ROOT" add "$VERSIONS_JSON" "$BUILD_DIR" "$GITHUB_PAGES_DIR/index.html" \
-  "$GITHUB_PAGES_DIR/.nojekyll" "$GITHUB_PAGES_DIR/.gdignore"
+git -C "$REPO_ROOT" add "$VERSIONS_JSON" "$BUILD_DIR" "$SITE_DIR/index.html" \
+  "$SITE_DIR/.nojekyll" "$SITE_DIR/.gdignore"
 
 echo "Published $NEXT_VERSION: \"$SUMMARY\""
 echo "Review the diff and run 'git commit' to finish publishing."
