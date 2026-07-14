@@ -8,7 +8,7 @@ fi
 
 SUMMARY="$1"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
-SITE_DIR="$REPO_ROOT/site"
+SITE_DIR="$REPO_ROOT/docs"
 VERSIONS_JSON="$SITE_DIR/versions.json"
 
 if ! command -v godot >/dev/null 2>&1; then
@@ -47,7 +47,7 @@ fi
 # GitHub Pages serves this folder directly; disable Jekyll so it doesn't filter
 # or mangle the exported build's files/folders.
 touch "$SITE_DIR/.nojekyll"
-# The export is written inside the Godot project (res://site/); a .gdignore
+# The export is written inside the Godot project (res://docs/); a .gdignore
 # stops the editor from importing the build output (e.g. the .png boot splash),
 # which would otherwise clutter the project with .import files on every publish.
 touch "$SITE_DIR/.gdignore"

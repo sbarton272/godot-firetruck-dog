@@ -6,7 +6,7 @@ A Godot game project. Engine version: **Godot 4.7** (GL Compatibility renderer).
 
 - `project.godot` — Godot project config (engine version, features, renderer).
 - `.godot/` — engine-generated cache, gitignored, never edit by hand.
-- `docs/plans/` — implementation plans for multi-step features/changes go here (see `writing-plans` skill).
+- `plans/` — implementation plans for multi-step features/changes go here (see `writing-plans` skill).
 - `worktrees/` — git worktrees used for isolated feature work, gitignored.
 
 ## Godot documentation
@@ -21,4 +21,4 @@ Do not assume GDScript/API details from memory without verifying against the 4.7
 
 ## Plans
 
-Save implementation plans for non-trivial features to `docs/plans/` as markdown files before starting multi-step work.
+Save implementation plans for non-trivial features to `plans/` as markdown files before starting multi-step work.
