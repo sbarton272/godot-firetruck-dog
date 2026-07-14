@@ -1,54 +1,62 @@
-[gd_scene load_steps=5 format=3 uid="uid://c1f2i3r4e5s6m"]
+[gd_scene load_steps=9 format=3 uid="uid://c1f2i3r4e5s6m"]
 
-[sub_resource type="QuadMesh" id="QuadMesh_fire"]
-size = Vector2(0.6, 0.8)
+[ext_resource type="Texture2D" path="res://art/effects/fire_flipbook.png" id="1_flame"]
 
-[sub_resource type="StandardMaterial3D" id="Material_fire"]
-transparency = 1
-shading_mode = 0
-vertex_color_use_as_albedo = true
-albedo_color = Color(1, 0.45, 0.1, 0.85)
-billboard_mode = 1
+[sub_resource type="AtlasTexture" id="Atlas_0"]
+atlas = ExtResource("1_flame")
+region = Rect2(0, 0, 64, 96)
 
-[sub_resource type="QuadMesh" id="QuadMesh_smoke"]
-size = Vector2(0.9, 0.9)
+[sub_resource type="AtlasTexture" id="Atlas_1"]
+atlas = ExtResource("1_flame")
+region = Rect2(64, 0, 64, 96)
 
-[sub_resource type="StandardMaterial3D" id="Material_smoke"]
-transparency = 1
-shading_mode = 0
-vertex_color_use_as_albedo = true
-albedo_color = Color(0.35, 0.35, 0.35, 0.4)
-billboard_mode = 1
+[sub_resource type="AtlasTexture" id="Atlas_2"]
+atlas = ExtResource("1_flame")
+region = Rect2(128, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_3"]
+atlas = ExtResource("1_flame")
+region = Rect2(192, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_4"]
+atlas = ExtResource("1_flame")
+region = Rect2(256, 0, 64, 96)
+
+[sub_resource type="AtlasTexture" id="Atlas_5"]
+atlas = ExtResource("1_flame")
+region = Rect2(320, 0, 64, 96)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_fire"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("Atlas_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_5")
+}],
+"loop": true,
+"name": &"default",
+"speed": 10.0
+}]
 
 [node name="FireSmoke" type="Node3D"]
 
-[node name="Fire" type="CPUParticles3D" parent="."]
-emitting = true
-amount = 20
-lifetime = 0.5
-mesh = SubResource("QuadMesh_fire")
-material_override = SubResource("Material_fire")
-direction = Vector3(0, 1, 0)
-spread = 20.0
-gravity = Vector3(0, 2, 0)
-initial_velocity_min = 1.5
-initial_velocity_max = 2.5
-scale_amount_min = 0.4
-scale_amount_max = 0.9
-color = Color(1, 0.45, 0.1, 0.85)
-
-[node name="Smoke" type="CPUParticles3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
-emitting = true
-amount = 14
-lifetime = 2.0
-mesh = SubResource("QuadMesh_smoke")
-material_override = SubResource("Material_smoke")
-direction = Vector3(0, 1, 0)
-spread = 15.0
-gravity = Vector3(0, 0.6, 0)
-initial_velocity_min = 0.8
-initial_velocity_max = 1.3
-scale_amount_min = 0.8
-scale_amount_max = 1.6
-color = Color(0.35, 0.35, 0.35, 0.45)
+[node name="Flame" type="AnimatedSprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+billboard = 1
+pixel_size = 0.012
+sprite_frames = SubResource("SpriteFrames_fire")
+autoplay = "default"
