@@ -1,0 +1,8 @@
+# Dev toolchain for this project, pinned for reproducibility.
+# Installed/activated automatically via .envrc (direnv -> `eval "$(mise env)"`).
+# Godot is NOT managed here — it's a GUI app installed separately (brew cask);
+# .envrc asserts a compatible Godot 4.7 is on PATH.
+[tools]
+python = "3.13.14"
+uv = "0.11.28"
+jq = "1.8.2"
