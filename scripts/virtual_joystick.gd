@@ -2,8 +2,10 @@ extends Control
 
 @export var radius: float = 140.0
 @export var dead_zone_ratio: float = 0.12
-@export var base_color: Color = Color(1, 1, 1, 0.22)
-@export var knob_color: Color = Color(1, 1, 1, 0.55)
+@export var base_color: Color = Color(0.08, 0.08, 0.08, 0.45)
+@export var ring_color: Color = Color(1, 1, 1, 0.85)
+@export var knob_color: Color = Color(1, 1, 1, 0.95)
+@export var ring_width: float = 3.0
 @export var knob_radius_ratio: float = 0.36
 
 const _ACTIONS := ["throttle_forward", "throttle_reverse", "steer_left", "steer_right"]
@@ -89,5 +91,8 @@ func _on_visibility_changed() -> void:
 func _draw() -> void:
 	var center: Vector2 = _touch_center if _active_touch != -1 else size * 0.5
 	draw_circle(center, radius, base_color)
-	draw_arc(center, radius, 0.0, TAU, 48, Color(1, 1, 1, 0.35), 2.0, true)
-	draw_circle(center + _knob_offset, radius * knob_radius_ratio, knob_color)
+	draw_arc(center, radius, 0.0, TAU, 48, ring_color, ring_width, true)
+	var knob_center: Vector2 = center + _knob_offset
+	var knob_r: float = radius * knob_radius_ratio
+	draw_circle(knob_center, knob_r, knob_color)
+	draw_arc(knob_center, knob_r, 0.0, TAU, 32, Color(0, 0, 0, 0.55), 2.0, true)
