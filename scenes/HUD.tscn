@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://dsh7d8e9f0g1h"]
+[gd_scene load_steps=4 format=3 uid="uid://dsh7d8e9f0g1h"]
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://scripts/virtual_joystick.gd" id="2_joystick"]
+[ext_resource type="FontFile" path="res://art/fonts/LuckiestGuy-Regular.ttf" id="3_font"]
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -30,14 +31,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -400.0
-offset_top = -195.0
-offset_right = 400.0
+offset_left = -900.0
+offset_top = -215.0
+offset_right = 900.0
 offset_bottom = -120.0
 theme_override_colors/font_color = Color(1, 0.6, 0.15, 1)
 theme_override_colors/font_outline_color = Color(0.3, 0.12, 0.05, 1)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 46
+theme_override_constants/outline_size = 10
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 76
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "Chief Waffles, Firehouse Dog"
@@ -51,11 +53,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -150.0
+offset_left = -260.0
 offset_top = -110.0
-offset_right = 150.0
-offset_bottom = -70.0
-theme_override_font_sizes/font_size = 26
+offset_right = 260.0
+offset_bottom = -60.0
+theme_override_colors/font_color = Color(0.98, 0.98, 0.98, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.1, 0.05, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 36
 horizontal_alignment = 1
 text = "Move with WASD"
 
