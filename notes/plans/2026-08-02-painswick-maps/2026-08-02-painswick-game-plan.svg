@@ -1,0 +1,392 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1240" font-family="Georgia, serif">
+  <defs>
+    <symbol id="lamp" overflow="visible">
+      <circle r="1.4" fill="#3a2a10"/>
+      <circle cy="-4" r="2.6" fill="#f2c568" stroke="#5a3a10" stroke-width="0.7"/>
+      <line x1="0" y1="-1.4" x2="0" y2="-3" stroke="#3a2a10" stroke-width="0.9"/>
+    </symbol>
+    <symbol id="car" overflow="visible">
+      <rect x="-6" y="-3" width="12" height="6" rx="1.5" fill="#5a7fbf" stroke="#1a2a4a" stroke-width="0.7"/>
+      <rect x="-4" y="-2" width="8" height="3" rx="0.6" fill="#a8c4e8" stroke="#1a2a4a" stroke-width="0.3"/>
+    </symbol>
+    <symbol id="mailbox" overflow="visible">
+      <rect x="-2.5" y="-4" width="5" height="8" fill="#a03a3a" stroke="#2a1010" stroke-width="0.6"/>
+      <line x1="0" y1="-4" x2="0" y2="4" stroke="#2a1010" stroke-width="0.3"/>
+    </symbol>
+    <symbol id="trash" overflow="visible">
+      <rect x="-3" y="-3.5" width="6" height="7" fill="#3a3a3a" stroke="#0a0a0a" stroke-width="0.6"/>
+      <rect x="-3" y="-4.2" width="6" height="1.4" fill="#5a5a5a" stroke="#0a0a0a" stroke-width="0.4"/>
+    </symbol>
+    <symbol id="market" overflow="visible">
+      <circle r="9" fill="#d4a44a" stroke="#5a3a10" stroke-width="1.4"/>
+      <line x1="0" y1="-12" x2="0" y2="12" stroke="#5a3a10" stroke-width="2.6"/>
+      <line x1="-8" y1="-5" x2="8" y2="-5" stroke="#5a3a10" stroke-width="2.6"/>
+    </symbol>
+    <symbol id="yew" overflow="visible">
+      <circle r="4" fill="#3e5c3a" stroke="#243a20" stroke-width="0.6"/>
+    </symbol>
+    <pattern id="field" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">
+      <rect width="18" height="18" fill="#b8d18a"/>
+      <line x1="0" y1="0" x2="0" y2="18" stroke="#a8c47a" stroke-width="1.5"/>
+    </pattern>
+    <pattern id="field-alt" width="14" height="14" patternUnits="userSpaceOnUse">
+      <rect width="14" height="14" fill="#c6dc93"/>
+      <circle cx="7" cy="7" r="1" fill="#8fa860"/>
+    </pattern>
+  </defs>
+
+  <!-- =============== HEADER =============== -->
+  <rect x="0" y="0" width="1000" height="84" fill="#f5efdc"/>
+  <text x="18" y="30" font-size="22" font-weight="bold" fill="#3a2a10">
+    Painswick Town Centre — Game Plan (simplified from Option 1)
+  </text>
+  <text x="18" y="52" font-size="12" fill="#3a2a10">
+    Playfield ≈ 150 × 150 game units (map scale: 6 SVG px = 1 unit). Terrace blocks sit off the road curb;
+    fields are clear of every road, building, and the churchyard.
+  </text>
+  <text x="18" y="70" font-size="11" fill="#5a4a2a" font-style="italic">
+    Real-map inspiration: layout-1-town-core.svg. Drives target: leave S garage, work through the
+    market past the church, deliver to the Vicarage St cottage fire (NE).
+  </text>
+
+  <!-- =============== MAP AREA =============== -->
+  <g transform="translate(0,90)">
+    <rect x="0" y="0" width="1000" height="920" fill="#d1e0a1"/>
+
+    <!-- ========== FIELDS (rectangular polygons in the corners, well clear of roads & terraces) ========== -->
+    <!-- Field A: Ham Butts (NW) -->
+    <polygon points="70,90 340,90 340,175 70,175" fill="url(#field)"/>
+    <polygon points="70,90 340,90 340,175 70,175"
+             fill="none" stroke="#6b5533" stroke-width="2.4" stroke-dasharray="8 4"/>
+    <text x="205" y="140" font-size="12" fill="#3a5a10" font-style="italic" text-anchor="middle">Ham Butts</text>
+
+    <!-- Field B: NE Pasture -->
+    <polygon points="700,90 930,90 930,168 700,168" fill="url(#field-alt)"/>
+    <polygon points="700,90 930,90 930,168 700,168"
+             fill="none" stroke="#6b5533" stroke-width="2.4" stroke-dasharray="8 4"/>
+    <text x="815" y="135" font-size="12" fill="#3a5a10" font-style="italic" text-anchor="middle">pasture ↗ Beacon</text>
+
+    <!-- Field C: West Meadow -->
+    <polygon points="70,205 335,205 335,660 70,660" fill="url(#field-alt)"/>
+    <polygon points="70,205 335,205 335,660 70,660"
+             fill="none" stroke="#6b5533" stroke-width="2.4" stroke-dasharray="8 4"/>
+    <text x="200" y="440" font-size="12" fill="#3a5a10" font-style="italic" text-anchor="middle">West Meadow</text>
+
+    <!-- Field D: SW Hedged Meadow -->
+    <polygon points="72,700 425,700 425,860 72,860" fill="url(#field)"/>
+    <polygon points="72,700 425,700 425,860 72,860"
+             fill="none" stroke="#6b5533" stroke-width="2.4" stroke-dasharray="8 4"/>
+    <text x="250" y="785" font-size="12" fill="#3a5a10" font-style="italic" text-anchor="middle">SW hedged meadow</text>
+
+    <!-- Field E: Tibbiwell Fields (narrow SE strip well south of Tibbiwell Lane) -->
+    <polygon points="730,810 930,810 930,858 730,858" fill="url(#field-alt)"/>
+    <polygon points="730,810 930,810 930,858 730,858"
+             fill="none" stroke="#6b5533" stroke-width="2.4" stroke-dasharray="8 4"/>
+    <text x="830" y="840" font-size="12" fill="#3a5a10" font-style="italic" text-anchor="middle">Tibbiwell fields</text>
+
+    <!-- Field F: East Paddocks (E of town, N of Tibbiwell Lane) -->
+    <polygon points="745,240 935,240 935,560 745,560" fill="url(#field)"/>
+    <polygon points="745,240 935,240 935,560 745,560"
+             fill="none" stroke="#6b5533" stroke-width="2.4" stroke-dasharray="8 4"/>
+    <text x="840" y="400" font-size="12" fill="#3a5a10" font-style="italic" text-anchor="middle">east paddocks</text>
+
+    <!-- ========== STREETS ========== -->
+    <g fill="none" stroke="#5a4a2a" stroke-width="30" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M490,880 Q475,720 445,560 T405,360 T395,180 L405,80"/>
+      <path d="M650,880 Q665,720 680,560 Q705,470 700,380 Q685,240 665,80"/>
+      <path d="M400,205 Q550,195 700,210"/>
+      <path d="M445,590 Q570,605 705,555"/>
+      <path d="M705,555 Q800,620 900,750"/>
+      <path d="M700,210 Q810,195 940,175"/>
+    </g>
+    <g fill="none" stroke="#e7dec5" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M490,880 Q475,720 445,560 T405,360 T395,180 L405,80"/>
+      <path d="M650,880 Q665,720 680,560 Q705,470 700,380 Q685,240 665,80"/>
+      <path d="M400,205 Q550,195 700,210"/>
+      <path d="M445,590 Q570,605 705,555"/>
+      <path d="M705,555 Q800,620 900,750"/>
+      <path d="M700,210 Q810,195 940,175"/>
+    </g>
+    <g fill="none" stroke="#a89460" stroke-width="0.8" stroke-dasharray="6 6" opacity="0.55">
+      <path d="M490,880 Q475,720 445,560 T405,360 T395,180 L405,80"/>
+      <path d="M650,880 Q665,720 680,560 Q705,470 700,380 Q685,240 665,80"/>
+    </g>
+
+    <!-- ========== TERRACE BLOCKS (merged houses, sit ~15px off the road curb) ========== -->
+    <g stroke="#7a6b46" stroke-width="1.1">
+      <!-- T1: New Street WEST top (y ~170-360) -->
+      <g transform="translate(370,265) rotate(4)">
+        <rect x="-11" y="-95" width="22" height="190" fill="#cdbf99"/>
+        <line x1="-11" y1="-63" x2="11" y2="-63"/><line x1="-11" y1="-32" x2="11" y2="-32"/>
+        <line x1="-11" y1="0"   x2="11" y2="0"/>  <line x1="-11" y1="32"  x2="11" y2="32"/>
+        <line x1="-11" y1="63"  x2="11" y2="63"/>
+      </g>
+      <!-- T2: New Street WEST mid (y ~415-555) -->
+      <g transform="translate(395,485) rotate(-4)">
+        <rect x="-11" y="-70" width="22" height="140" fill="#c9b98a"/>
+        <line x1="-11" y1="-46" x2="11" y2="-46"/><line x1="-11" y1="-23" x2="11" y2="-23"/>
+        <line x1="-11" y1="0"   x2="11" y2="0"/>  <line x1="-11" y1="23"  x2="11" y2="23"/>
+        <line x1="-11" y1="46"  x2="11" y2="46"/>
+      </g>
+      <!-- T3: New Street WEST south (y ~670-820) -->
+      <g transform="translate(445,745) rotate(-8)">
+        <rect x="-11" y="-75" width="22" height="150" fill="#cdbf99"/>
+        <line x1="-11" y1="-50" x2="11" y2="-50"/><line x1="-11" y1="-25" x2="11" y2="-25"/>
+        <line x1="-11" y1="0"   x2="11" y2="0"/>  <line x1="-11" y1="25"  x2="11" y2="25"/>
+        <line x1="-11" y1="50"  x2="11" y2="50"/>
+      </g>
+
+      <!-- T4: New Street EAST south (between New St and church) -->
+      <g transform="translate(515,780) rotate(-6)">
+        <rect x="-10" y="-70" width="20" height="140" fill="#d4c2a3"/>
+        <line x1="-10" y1="-46" x2="10" y2="-46"/><line x1="-10" y1="-23" x2="10" y2="-23"/>
+        <line x1="-10" y1="0"   x2="10" y2="0"/>  <line x1="-10" y1="23"  x2="10" y2="23"/>
+        <line x1="-10" y1="46"  x2="10" y2="46"/>
+      </g>
+
+      <!-- T5: Bisley WEST south -->
+      <g transform="translate(625,780) rotate(6)">
+        <rect x="-10" y="-70" width="20" height="140" fill="#cdbf99"/>
+        <line x1="-10" y1="-46" x2="10" y2="-46"/><line x1="-10" y1="-23" x2="10" y2="-23"/>
+        <line x1="-10" y1="0"   x2="10" y2="0"/>  <line x1="-10" y1="23"  x2="10" y2="23"/>
+        <line x1="-10" y1="46"  x2="10" y2="46"/>
+      </g>
+      <!-- T6: Bisley WEST mid (between Bisley and church east side) -->
+      <g transform="translate(668,395) rotate(-4)">
+        <rect x="-10" y="-55" width="20" height="110" fill="#c9b98a"/>
+        <line x1="-10" y1="-33" x2="10" y2="-33"/><line x1="-10" y1="-11" x2="10" y2="-11"/>
+        <line x1="-10" y1="11"  x2="10" y2="11"/> <line x1="-10" y1="33"  x2="10" y2="33"/>
+      </g>
+
+      <!-- T7: Bisley EAST south -->
+      <g transform="translate(695,780) rotate(8)">
+        <rect x="-11" y="-70" width="22" height="140" fill="#cdbf99"/>
+        <line x1="-11" y1="-46" x2="11" y2="-46"/><line x1="-11" y1="-23" x2="11" y2="-23"/>
+        <line x1="-11" y1="0"   x2="11" y2="0"/>  <line x1="-11" y1="23"  x2="11" y2="23"/>
+        <line x1="-11" y1="46"  x2="11" y2="46"/>
+      </g>
+      <!-- T8: Bisley EAST mid -->
+      <g transform="translate(720,510) rotate(-6)">
+        <rect x="-11" y="-75" width="22" height="150" fill="#c9b98a"/>
+        <line x1="-11" y1="-50" x2="11" y2="-50"/><line x1="-11" y1="-25" x2="11" y2="-25"/>
+        <line x1="-11" y1="0"   x2="11" y2="0"/>  <line x1="-11" y1="25"  x2="11" y2="25"/>
+        <line x1="-11" y1="50"  x2="11" y2="50"/>
+      </g>
+      <!-- T9: Bisley EAST N -->
+      <g transform="translate(715,270) rotate(-3)">
+        <rect x="-10" y="-45" width="20" height="90" fill="#d4c2a3"/>
+        <line x1="-10" y1="-30" x2="10" y2="-30"/><line x1="-10" y1="-15" x2="10" y2="-15"/>
+        <line x1="-10" y1="0"   x2="10" y2="0"/>  <line x1="-10" y1="15"  x2="10" y2="15"/>
+        <line x1="-10" y1="30"  x2="10" y2="30"/>
+      </g>
+
+      <!-- T10: N of Victoria St, between New St and Bisley N exits (single central block) -->
+      <g transform="translate(532,130)">
+        <rect x="-105" y="-10" width="210" height="20" fill="#cdbf99"/>
+        <line x1="-70" y1="-10" x2="-70" y2="10"/><line x1="-35" y1="-10" x2="-35" y2="10"/>
+        <line x1="0"   y1="-10" x2="0"   y2="10"/><line x1="35"  y1="-10" x2="35"  y2="10"/>
+        <line x1="70"  y1="-10" x2="70"  y2="10"/>
+      </g>
+
+      <!-- T11: Tibbiwell Lane terrace (NW of the road, well clear of Tibbiwell fields) -->
+      <g transform="translate(823,615) rotate(48)">
+        <rect x="-55" y="-10" width="110" height="20" fill="#c9b98a"/>
+        <line x1="-37" y1="-10" x2="-37" y2="10"/><line x1="-18" y1="-10" x2="-18" y2="10"/>
+        <line x1="0"   y1="-10" x2="0"   y2="10"/><line x1="18"  y1="-10" x2="18"  y2="10"/>
+        <line x1="37"  y1="-10" x2="37"  y2="10"/>
+      </g>
+
+      <!-- T12: Vicarage St terrace (N side of road, above east paddocks) -->
+      <g transform="translate(830,215) rotate(-8)">
+        <rect x="-60" y="-9" width="120" height="18" fill="#d4c2a3"/>
+        <line x1="-40" y1="-9" x2="-40" y2="9"/><line x1="-20" y1="-9" x2="-20" y2="9"/>
+        <line x1="0"   y1="-9" x2="0"   y2="9"/><line x1="20"  y1="-9" x2="20"  y2="9"/>
+        <line x1="40"  y1="-9" x2="40"  y2="9"/>
+      </g>
+    </g>
+
+    <!-- ========== CHURCHYARD ========== -->
+    <ellipse cx="555" cy="410" rx="88" ry="85" fill="#d4dfae" stroke="#4a6a35" stroke-width="1.4" stroke-dasharray="4 3"/>
+    <g>
+      <use href="#yew" x="555" y="330"/><use href="#yew" x="596" y="340"/><use href="#yew" x="628" y="365"/>
+      <use href="#yew" x="642" y="410"/><use href="#yew" x="628" y="455"/><use href="#yew" x="596" y="480"/>
+      <use href="#yew" x="555" y="492"/><use href="#yew" x="513" y="480"/><use href="#yew" x="482" y="455"/>
+      <use href="#yew" x="468" y="410"/><use href="#yew" x="482" y="365"/><use href="#yew" x="513" y="340"/>
+      <use href="#yew" x="540" y="380"/><use href="#yew" x="570" y="440"/>
+    </g>
+    <g>
+      <rect x="530" y="392" width="52" height="36" fill="#b8ab84" stroke="#4a3a1c" stroke-width="1.4"/>
+      <rect x="547" y="368" width="18" height="26" fill="#b8ab84" stroke="#4a3a1c" stroke-width="1.4"/>
+      <polygon points="547,368 565,368 556,352" fill="#8a7a58" stroke="#4a3a1c" stroke-width="1"/>
+      <line x1="556" y1="352" x2="556" y2="340" stroke="#4a3a1c" stroke-width="2"/>
+      <line x1="551" y1="345" x2="561" y2="345" stroke="#4a3a1c" stroke-width="2"/>
+    </g>
+    <text x="555" y="512" font-size="12" font-weight="bold" fill="#3a2a10" text-anchor="middle"
+          stroke="white" stroke-width="3" paint-order="stroke" stroke-linejoin="round">
+      St Mary's Church (99 yews)
+    </text>
+
+    <!-- ========== TOWN HALL ========== -->
+    <g>
+      <rect x="490" y="245" width="34" height="24" fill="#c9b98a" stroke="#5a4a1c" stroke-width="1.2"/>
+      <rect x="503" y="253" width="8" height="10" fill="#f2c568" stroke="#5a4a1c" stroke-width="0.6"/>
+      <text x="507" y="238" font-size="10" font-weight="bold" fill="#3a2a10" text-anchor="middle"
+            stroke="white" stroke-width="3" paint-order="stroke" stroke-linejoin="round">Town Hall</text>
+    </g>
+
+    <!-- ========== MARKET CROSS ========== -->
+    <use href="#market" x="500" y="597"/>
+    <text x="500" y="622" font-size="10" fill="#5a3a10" text-anchor="middle"
+          stroke="white" stroke-width="3" paint-order="stroke" stroke-linejoin="round">Market Cross</text>
+
+    <!-- ========== FIRE (goal, NE Vicarage St cottage) ========== -->
+    <g transform="translate(895,180)">
+      <rect x="-16" y="-12" width="32" height="24" fill="#b0704d" stroke="#3a1a0a" stroke-width="1.4"/>
+      <line x1="-16" y1="-4" x2="16" y2="-4" stroke="#3a1a0a" stroke-width="0.6" opacity="0.6"/>
+      <path d="M-8,-12 q-6,-14 4,-22 q-2,10 8,10 q-4,-16 8,-24 q-2,20 12,26 q-6,10 -16,10 z" fill="#e05a2a"/>
+      <path d="M-4,-14 q-4,-8 2,-14 q0,6 6,6 q-2,-10 4,-12 q0,10 6,14 q-4,6 -10,6 z" fill="#f7c948"/>
+      <circle r="20" fill="none" stroke="#d94f2a" stroke-width="2.4" stroke-dasharray="4 3"/>
+      <text x="0" y="34" font-size="12" font-weight="bold" fill="#a02a10" text-anchor="middle"
+            stroke="white" stroke-width="3" paint-order="stroke" stroke-linejoin="round">FIRE (goal)</text>
+    </g>
+
+    <!-- ========== TRUCK START (fire station S end of New St) ========== -->
+    <g transform="translate(490,900)">
+      <rect x="-22" y="-14" width="44" height="28" fill="#5a5a5a" stroke="#1a1a1a" stroke-width="1.2"/>
+      <rect x="-20" y="-12" width="18" height="24" fill="#2a5a9e" stroke="#0a1a3a" stroke-width="0.8"/>
+      <rect x="2" y="-12" width="18" height="24" fill="#2a5a9e" stroke="#0a1a3a" stroke-width="0.8"/>
+      <circle r="20" fill="none" stroke="#2a5a9e" stroke-width="2.4" stroke-dasharray="4 3"/>
+      <text x="0" y="-28" font-size="12" font-weight="bold" fill="#0a1a3a" text-anchor="middle"
+            stroke="white" stroke-width="3" paint-order="stroke" stroke-linejoin="round">TRUCK START (fire station)</text>
+    </g>
+
+    <!-- ========== PARKED CARS (on the road, aligned with street tangent) ========== -->
+    <use href="#car" x="486" y="800" transform="rotate(87 486 800)"/>
+    <use href="#car" x="450" y="580" transform="rotate(80 450 580)"/>
+    <use href="#car" x="400" y="280" transform="rotate(80 400 280)"/>
+    <use href="#car" x="658" y="800" transform="rotate(93 658 800)"/>
+    <use href="#car" x="702" y="420" transform="rotate(75 702 420)"/>
+    <use href="#car" x="590" y="595" transform="rotate(-5 590 595)"/>
+    <use href="#car" x="800" y="195" transform="rotate(-8 800 195)"/>
+    <use href="#car" x="800" y="635" transform="rotate(48 800 635)"/>
+
+    <!-- ========== LAMPPOSTS ========== -->
+    <use href="#lamp" x="490" y="870"/><use href="#lamp" x="650" y="870"/>
+    <use href="#lamp" x="450" y="600"/><use href="#lamp" x="505" y="580"/>
+    <use href="#lamp" x="700" y="560"/>
+    <use href="#lamp" x="405" y="215"/><use href="#lamp" x="700" y="215"/>
+    <use href="#lamp" x="900" y="750"/>
+    <use href="#lamp" x="405" y="90"/> <use href="#lamp" x="665" y="90"/>
+
+    <!-- ========== MAILBOXES / TRASHCANS ========== -->
+    <use href="#mailbox" x="475" y="770"/>
+    <use href="#mailbox" x="710" y="270"/>
+    <use href="#mailbox" x="620" y="825"/>
+    <use href="#trash"   x="540" y="600"/>
+    <use href="#trash"   x="425" y="450"/>
+    <use href="#trash"   x="760" y="590"/>
+
+    <!-- ========== STREET LABELS ========== -->
+    <g font-size="12" fill="#3a2a10" font-style="italic" font-weight="bold">
+      <text x="420" y="775" transform="rotate(-82 420 775)"
+            stroke="white" stroke-width="3" paint-order="stroke" stroke-linejoin="round">New Street</text>
+      <text x="680" y="775" transform="rotate(-82 680 775)"
+            stroke="white" stroke-width="3" paint-order="stroke" stroke-linejoin="round">Bisley Street</text>
+      <text x="435" y="192"
+            stroke="white" stroke-width="3" paint-order="stroke" stroke-linejoin="round">Victoria St</text>
+      <text x="520" y="580"
+            stroke="white" stroke-width="3" paint-order="stroke" stroke-linejoin="round">Friday St</text>
+      <text x="770" y="700" transform="rotate(48 770 700)"
+            stroke="white" stroke-width="3" paint-order="stroke" stroke-linejoin="round">Tibbiwell Ln ↘</text>
+      <text x="810" y="165"
+            stroke="white" stroke-width="3" paint-order="stroke" stroke-linejoin="round">Vicarage St →</text>
+    </g>
+
+    <!-- ========== COMPASS ========== -->
+    <g transform="translate(920,80)">
+      <circle r="26" fill="#f5efdc" stroke="#6b5533" stroke-width="1.4"/>
+      <line x1="0" y1="-22" x2="0" y2="22" stroke="#6b5533"/>
+      <line x1="-22" y1="0" x2="22" y2="0" stroke="#6b5533"/>
+      <text y="-10" text-anchor="middle" font-size="12" font-weight="bold" fill="#3a2a10">N</text>
+      <text y="18" text-anchor="middle" font-size="11" fill="#3a2a10">S</text>
+      <text x="-15" y="4" font-size="11" fill="#3a2a10">W</text>
+      <text x="11" y="4" font-size="11" fill="#3a2a10">E</text>
+    </g>
+
+    <!-- ========== SCALE ========== -->
+    <g transform="translate(30,905)">
+      <line x1="0" y1="0" x2="150" y2="0" stroke="#3a2a10" stroke-width="3"/>
+      <line x1="0" y1="-5" x2="0" y2="5" stroke="#3a2a10" stroke-width="2"/>
+      <line x1="150" y1="-5" x2="150" y2="5" stroke="#3a2a10" stroke-width="2"/>
+      <text x="75" y="-8" text-anchor="middle" font-size="11" fill="#3a2a10">25 game units</text>
+    </g>
+  </g>
+
+  <!-- =============== LEGEND & ENTITY TABLE =============== -->
+  <g transform="translate(0,1020)">
+    <rect x="0" y="0" width="1000" height="220" fill="#faf5e5"/>
+    <text x="18" y="22" font-size="14" font-weight="bold" fill="#3a2a10">Game entities to spawn (Scenes → obstacles/*.tscn)</text>
+
+    <g font-size="12" fill="#3a2a10">
+      <g transform="translate(18,50)">
+        <g>
+          <rect x="0" y="-8" width="24" height="14" fill="#cdbf99" stroke="#7a6b46"/>
+          <line x1="8" y1="-8" x2="8" y2="6" stroke="#7a6b46"/>
+          <line x1="16" y1="-8" x2="16" y2="6" stroke="#7a6b46"/>
+          <text x="34" y="4"><tspan font-weight="bold">Building (terrace)</tspan> × 12 — long merged blocks (art fills in cottages)</text>
+        </g>
+        <g transform="translate(0,28)">
+          <rect x="0" y="-8" width="24" height="14" fill="#b8ab84" stroke="#4a3a1c" stroke-width="1"/>
+          <text x="34" y="4"><tspan font-weight="bold">Building (church)</tspan> × 1 — St Mary's inside churchyard</text>
+        </g>
+        <g transform="translate(0,54)">
+          <rect x="0" y="-8" width="24" height="14" fill="#c9b98a" stroke="#5a4a1c" stroke-width="1"/>
+          <text x="34" y="4"><tspan font-weight="bold">Building (Town Hall)</tspan> × 1 — north of churchyard on Victoria St</text>
+        </g>
+        <g transform="translate(0,80)">
+          <use href="#market" x="10" y="-1" transform="scale(0.6) translate(6,0)"/>
+          <text x="34" y="4"><tspan font-weight="bold">Market Cross</tspan> × 1 — obstacle at Friday St / New St corner</text>
+        </g>
+        <g transform="translate(0,106)">
+          <use href="#yew" x="10" y="-1"/>
+          <text x="34" y="4"><tspan font-weight="bold">Yews</tspan> × 14 — small tree obstacles ringing the churchyard</text>
+        </g>
+        <g transform="translate(0,132)">
+          <use href="#car" x="12" y="0"/>
+          <text x="34" y="4"><tspan font-weight="bold">ParkedCar</tspan> × 8 — on the street, aligned with the road</text>
+        </g>
+      </g>
+
+      <g transform="translate(500,50)">
+        <use href="#lamp" x="10" y="2"/>
+        <text x="34" y="4"><tspan font-weight="bold">LampPost</tspan> × 10 — at junctions, market, church, both N exits</text>
+        <g transform="translate(0,28)">
+          <use href="#mailbox" x="10" y="0"/>
+          <text x="34" y="4"><tspan font-weight="bold">Mailbox</tspan> × 3 — one per residential cluster</text>
+        </g>
+        <g transform="translate(0,54)">
+          <use href="#trash" x="10" y="0"/>
+          <text x="34" y="4"><tspan font-weight="bold">TrashCan</tspan> × 3 — near market, on New St, on Tibbiwell corner</text>
+        </g>
+        <g transform="translate(0,80)">
+          <line x1="0" y1="0" x2="20" y2="0" stroke="#6b5533" stroke-width="2.4" stroke-dasharray="8 4"/>
+          <text x="34" y="4"><tspan font-weight="bold">FenceSegment</tspan> × ~28 — grouped into 6 field-boundary fences (one per field)</text>
+        </g>
+        <g transform="translate(0,106)">
+          <rect x="0" y="-6" width="20" height="12" fill="url(#field)"/>
+          <text x="34" y="4"><tspan font-weight="bold">Fields</tspan> × 6 — Ham Butts, NE pasture, W/SW meadow, Tibbiwell, E paddocks</text>
+        </g>
+        <g transform="translate(0,132)">
+          <circle cx="10" cy="0" r="7" fill="#2a5a9e" stroke="#0a1a3a"/>
+          <circle cx="30" cy="0" r="7" fill="#d94f2a" stroke="#3a1a0a"/>
+          <text x="44" y="4"><tspan font-weight="bold">StartPoint / GoalArea</tspan> — S end of New St / NE Vicarage St cottage</text>
+        </g>
+      </g>
+    </g>
+
+    <text x="18" y="200" font-size="11" fill="#5a4a2a" font-style="italic">
+      Streets (6): New Street • Bisley Street • Victoria Street • Friday Street • Tibbiwell Lane • Vicarage Street.
+      Terraces sit ≥15 px off the road curb; fields sit ≥10 px off the nearest terrace and are entirely clear of all roads.
+    </text>
+  </g>
+</svg>
