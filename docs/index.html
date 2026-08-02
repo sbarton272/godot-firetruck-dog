@@ -15,6 +15,21 @@
 </head>
 <body>
 <h1>Firetruck Dog</h1>
+<audio id="theme-song" src="audio/chief-waffles-theme.mp3" loop controls></audio>
+<script>
+  // Most browsers block autoplay with sound until the user interacts with the page,
+  // so try immediately and fall back to starting on first click/keypress.
+  const themeSong = document.getElementById('theme-song');
+  themeSong.play().catch(() => {
+    const startOnInteraction = () => {
+      themeSong.play();
+      document.removeEventListener('click', startOnInteraction);
+      document.removeEventListener('keydown', startOnInteraction);
+    };
+    document.addEventListener('click', startOnInteraction);
+    document.addEventListener('keydown', startOnInteraction);
+  });
+</script>
 <p>Published versions, newest first.</p>
 <ul>
   <li>
