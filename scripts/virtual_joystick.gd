@@ -8,12 +8,14 @@ extends Control
 @export var ring_width: float = 3.0
 @export var knob_radius_ratio: float = 0.36
 
-const _ACTIONS := ["throttle_forward", "throttle_reverse", "steer_left", "steer_right"]
-
 var _active_touch: int = -1
 var _touch_center: Vector2 = Vector2.ZERO
 var _knob_offset: Vector2 = Vector2.ZERO
 var _vector: Vector2 = Vector2.ZERO
+# Actions we currently hold pressed via Input.action_press. We only ever
+# release actions in this set — so pressing WASD while the joystick is
+# visible (e.g. iPad + Bluetooth keyboard) never gets clobbered.
+var _pressed: Dictionary = {}
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -72,16 +74,22 @@ func _process(_delta: float) -> void:
 func _set_axis(action: String, strength: float) -> void:
 	if strength > 0.0:
 		Input.action_press(action, strength)
-	else:
+		_pressed[action] = true
+	elif _pressed.has(action):
 		Input.action_release(action)
+		_pressed.erase(action)
+
+func _release_all_pressed() -> void:
+	for a in _pressed.keys():
+		Input.action_release(a)
+	_pressed.clear()
 
 func _release() -> void:
 	_active_touch = -1
 	_touch_center = Vector2.ZERO
 	_knob_offset = Vector2.ZERO
 	_vector = Vector2.ZERO
-	for a in _ACTIONS:
-		Input.action_release(a)
+	_release_all_pressed()
 	queue_redraw()
 
 func _on_visibility_changed() -> void:
