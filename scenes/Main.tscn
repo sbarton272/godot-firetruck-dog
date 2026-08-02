@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://ce7f2a3b4c5d6"]
+[gd_scene load_steps=25 format=3 uid="uid://ce7f2a3b4c5d6"]
 
 [ext_resource type="PackedScene" uid="uid://d0e1s2f3g4h5i" path="res://scenes/env/GameEnvironment.tscn" id="1_env"]
 [ext_resource type="PackedScene" uid="uid://c1f2i3r4e5s6m" path="res://scenes/effects/FireSmoke.tscn" id="11_firesmoke"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://c8k3n5p2q1r0s" path="res://scenes/Truck.tscn" id="8_truck"]
 [ext_resource type="PackedScene" uid="uid://dsh7d8e9f0g1h" path="res://scenes/HUD.tscn" id="9_hud"]
 [ext_resource type="Script" path="res://scripts/game_state.gd" id="10_gamestate"]
+[ext_resource type="AudioStream" uid="uid://hjd14uf22btu" path="res://audio/theme_song.mp3" id="12_theme_song"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(120, 1, 110)
@@ -47,6 +48,10 @@ truck_path = NodePath("Truck")
 hud_path = NodePath("HUD")
 goal_area_path = NodePath("GoalArea")
 start_point_path = NodePath("StartPoint")
+
+[node name="ThemeMusic" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("12_theme_song")
+autoplay = true
 
 [node name="GameEnvironment" parent="." instance=ExtResource("1_env")]
 
