@@ -4,6 +4,11 @@ extends CanvasLayer
 @export var help_fade_seconds: float = 0.6
 
 func _ready() -> void:
+	var touch: bool = DisplayServer.is_touchscreen_available()
+	$TouchControls.visible = touch
+	if touch:
+		$HelpOverlay/CaptionLabel.text = "Drag the stick to drive"
+		$HelpOverlay/KeysContainer.visible = false
 	$HelpOverlay.modulate.a = 1.0
 	await get_tree().create_timer(help_display_seconds).timeout
 	var tween := create_tween()
